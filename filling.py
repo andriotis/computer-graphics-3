@@ -1,8 +1,7 @@
 from numpy import *
 
-
 def load_data(file):
-    return load(file, allow_pickle=True).tolist().values()
+    return load(file, allow_pickle=True).tolist()
 
 
 edge = [('y_min', int),
@@ -40,7 +39,10 @@ def interpolate_color(x1, x2, x, C1, C2):
     return value
 
 
-def shade_triangle(img, verts2d, vcolors, shade_t, img_h, img_w):
+def shade_triangle(img, verts2d, vcolors, shade_t):
+
+    #, img_h, img_w
+
     # Each vertex needs its respective color for my edge structure.
     verts2d = append(verts2d, vcolors, axis=1)
 
@@ -89,19 +91,19 @@ def shade_triangle(img, verts2d, vcolors, shade_t, img_h, img_w):
 
         for x in range(int(leftmost_intersect), int(rightmost_intersect)):
 
-            if (x in range(0, img_w)) and (y in range(0, img_h)):
+            # if (x in range(0, img_w)) and (y in range(0, img_h)):
 
-                if shade_t == "flat":
-                    # Just paint (x, y).
-                    img[x, y] = C
+            # if shade_t == "flat":
+                # Just paint (x, y).
+                # img[x, y] = C
 
-                if shade_t == "gouraud":
-                    # Knowing Ca and Cb, interpolate for (x, y) and paint it.
-                    img[x, y] = interpolate_color(rightmost_intersect,
-                                                  leftmost_intersect,
-                                                  x,
-                                                  Cr,
-                                                  Cl)
+            # if shade_t == "gouraud":
+            # Knowing Ca and Cb, interpolate for (x, y) and paint it.
+            img[x, y] = interpolate_color(rightmost_intersect,
+                                          leftmost_intersect,
+                                          x,
+                                          Cr,
+                                          Cl)
 
         # Since I will be moving upwards, move every intersect,
         # one step up according to its slope.
@@ -136,5 +138,13 @@ def render(verts2d, faces, vcolors, depth, shade_t, img_h, img_w):
 
     # With the priority in mind, shade a triangle one by one.
     for face in faces[priority_of_triangles]:
-        img = shade_triangle(img, verts2d[face], vcolors[face], shade_t, img_h, img_w)
+
+        if shade_t == 'gouraud':
+            if (all(verts2d[face][0, :]) < img_w) and (all(verts2d[face][1, :]) < img_h):
+                img = shade_gouraud(img, verts2d[face], vcolors[face], shade_t, img_h, img_w)
+
+        else:
+            if (all(verts2d[face][0, :]) < img_w) and (all(verts2d[face][1, :]) < img_h):
+                img = shade_phong(img, verts2d[face], vcolors[face], shade_t, img_h, img_w)
+
     return img
