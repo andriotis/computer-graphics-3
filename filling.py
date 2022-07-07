@@ -9,7 +9,9 @@ edge = [('y_min', int),
         ('slope', float),
         ('intersect', float),
         ('RGB_min', float, (3,)),
-        ('RGB_max', float, (3,))]
+        ('RGB_max', float, (3,)),
+        ('N_min', float, (3,)),
+        ('N_max', float, (3,))]
 
 
 def create_edge(vertices):
@@ -25,9 +27,13 @@ def create_edge(vertices):
         # Initiate intersect to be the x-coordinate of the lower vertex.
         vertices[argmin(vertices[:, 1]), 0],
         # Store lower vertex's RGB.
-        vertices[argmin(vertices[:, 1]), 2:],
+        vertices[argmin(vertices[:, 1]), 2:5],
         # Store higher vertex's RGB.
-        vertices[argmax(vertices[:, 1]), 2:]
+        vertices[argmax(vertices[:, 1]), 2:5],
+        # Store lower vertex's surface normal
+        vertices[argmin(vertices[:, 1]), 5:],
+        # Store higher vertex's surface normal
+        vertices[argmax(vertices[:, 1]), 5:],
     )
 
     return array(info, edge)
