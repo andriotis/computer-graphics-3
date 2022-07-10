@@ -21,7 +21,7 @@ def load_data_properly(file):
                 complete[key] = value.reshape(-1, 1)
         # Change the list's content into column vectors
         elif type(value) is list:
-            for i in range(len(list)):
+            for i in range(len(value)):
                 value[i] = value[i].reshape(-1, 1)
             complete[key] = value
         else:
