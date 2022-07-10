@@ -3,6 +3,37 @@ from numpy.linalg import *
 from filling import *
 from transforms_projections import *
 
+def load_data_properly(file):
+
+    complete = {}
+
+    for (key, value) in load(file, allow_pickle=True).tolist().items():
+
+        if type(value) is ndarray:
+            if value.ndim is 2:
+                complete[key] = value.T
+            else:
+                complete[key] = value.reshape(-1, 1)
+        elif type(value) is list:
+            value[0] = value[0].reshape(-1, 1)
+            complete[key] = value
+        else:
+            complete[key] = value
+
+    ambient = complete.copy()
+    ambient['kd'] = ambient['ks'] = 0
+
+    diffuse = complete.copy()
+    diffuse['ka'] = diffuse['ks'] = 0
+
+    specular = complete.copy()
+    specular['ka'] = specular['kd'] = 0
+    
+    model_name = ['ambient', 'diffuse', 'specular', 'complete']
+    model_params = [ambient, diffuse, specular, complete]
+
+    return zip(model_name, model_params)
+
 
 def ambient_light(ka, Ia):
     return ka * Ia
@@ -54,7 +85,11 @@ def calculate_normals(vertices, face_indices):
     return normals
 
 
-def render_object(shader, focal, eye, lookat, up, bg_color, M, N, H, W, verts, vert_colors, face_indices, ka, kd, ks, n, light_positions, light_intensities, Ia):
+def render_object(shader,
+                  focal, eye, lookat, up, bg_color,
+                  M, N, H, W,
+                  verts, vert_colors, face_indices,
+                  ka, kd, ks, n, light_positions, light_intensities, Ia):
 
     normals = calculate_normals(vertices=verts, face_indices=face_indices)
 
