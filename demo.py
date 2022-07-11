@@ -1,3 +1,4 @@
+from filling import load_data_properly
 from illumination import *
 from cv2 import imwrite
 

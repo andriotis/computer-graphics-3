@@ -3,48 +3,6 @@ from numpy.linalg import *
 from filling import *
 from transforms_projections import *
 
-def load_data_properly(file):
-
-    # Somewhere to store the properly processed data
-    complete = {}
-
-    # For every key-value pair, preprocess and store
-    for (key, value) in load(file, allow_pickle=True).tolist().items():
-        # If is a matrix
-        if type(value) is ndarray:
-            # Not a vector but a matrix
-            if value.ndim is 2:
-                # Store its transpose
-                complete[key] = value.T
-            # Make it a column vector before storing it
-            else:
-                complete[key] = value.reshape(-1, 1)
-        # Change the list's content into column vectors
-        elif type(value) is list:
-            for i in range(len(value)):
-                value[i] = value[i].reshape(-1, 1)
-            complete[key] = value
-        else:
-            complete[key] = value
-
-    # Ambient has kd=ks=0 but ka != 0
-    ambient = complete.copy()
-    ambient['kd'] = ambient['ks'] = 0
-
-    # Diffuse has ka=ks=0 but kd != 0
-    diffuse = complete.copy()
-    diffuse['ka'] = diffuse['ks'] = 0
-
-    # Specular has ka=kd=0 but ks != 0
-    specular = complete.copy()
-    specular['ka'] = specular['kd'] = 0
-    
-    # Return both the name and the params for png creation purposes
-    model_name = ['ambient', 'diffuse', 'specular', 'complete']
-    model_params = [ambient, diffuse, specular, complete]
-
-    return zip(model_name, model_params)
-
 
 def ambient_light(ka, Ia):
     # Taken from page 500 of the book (7)
@@ -57,9 +15,9 @@ def diffuse_light(P, N, color, kd, light_positions, light_intensities):
     I = zeros(shape=(3, 1))
 
     for (source, intensity) in zip(light_positions, light_intensities):
-        # Get unit direction vector
+        # Get unit surface --> source vector
         L = (source - P) / norm(source - P)
-        # If it is <= 0 then it is 0 so don't add to the complete intensity
+        # If it is <= 0 then it is 0 so don't add it to the complete intensity
         if N.T @ L > 0:
             # Page 501 (10)
             I += kd * intensity * (N.T @ L)
